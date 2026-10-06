@@ -1,0 +1,39 @@
+services:
+
+  app:
+    build: .
+    # Dockerfile बाट image बनाऊ।
+    container_name: node_auth_api
+
+    ports:
+      - "5000:5000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - mongo
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+    restart: unless-stopped
+
+
+  mongo:
+    image: mongo:8
+
+    container_name: node_auth_mongo
+
+    ports:
+      - "27017:27017"
+
+    volumes:
+      - mongo_data:/data/db
+
+    restart: unless-stopped
+
+
+volumes:
+  mongo_data:

@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import User from "../models/User_model.js";
+import { cache, profileCacheScope } from "../utils/cache.js";
 
 import {
   digestRefreshToken,
@@ -156,6 +157,8 @@ export const login = async (req, res, next) => {
 
     await user.save();
 
+    await cache.invalidate(profileCacheScope(user._id));
+
     setAuthCookies(
       res,
       accessToken,
@@ -245,6 +248,8 @@ export const refreshAccessToken = async (req, res, next) => {
 
     await user.save();
 
+    await cache.invalidate(profileCacheScope(user._id));
+
     setAuthCookies(
       res,
       newAccessToken,
@@ -267,9 +272,9 @@ export const refreshAccessToken = async (req, res, next) => {
 
 export const getMe = async (req, res, next) => {
   try {
-    const user = await User
+    const user = await cache.remember(profileCacheScope(req.user.userId), "me", () => User
       .findById(req.user.userId)
-      .select("-password -refreshTokenHash");
+      .select("-password -refreshTokenHash"));
 
     if (!user) {
       return res.status(404).json({
@@ -310,6 +315,8 @@ export const logout = async (req, res, next) => {
             refreshTokenHash: null
           }
         );
+
+        await cache.invalidate(profileCacheScope(decoded.userId));
       } catch {
         // Cookie may already be expired.
     }

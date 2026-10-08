@@ -1,4 +1,5 @@
 import Product from "../models/Product_model.js";
+import { cache, productCacheScope } from "../utils/cache.js";
 
 
 // CREATE
@@ -28,6 +29,8 @@ export const createProduct = async (
       owner: req.user.userId
     });
 
+    await cache.invalidate(productCacheScope(req.user.userId));
+
     return res.status(201).json({
       success: true,
       product
@@ -45,11 +48,11 @@ export const getProducts = async (
   next
 ) => {
   try {
-    const products = await Product.find({
+    const products = await cache.remember(productCacheScope(req.user.userId), "list", () => Product.find({
       owner: req.user.userId
     }).sort({
       createdAt: -1
-    });
+    }));
 
     return res.status(200).json({
       success: true,
@@ -68,10 +71,10 @@ export const getProduct = async (
   next
 ) => {
   try {
-    const product = await Product.findOne({
+    const product = await cache.remember(productCacheScope(req.user.userId), `item:${req.params.id}`, () => Product.findOne({
       _id: req.params.id,
       owner: req.user.userId
-    });
+    }));
 
     if (!product) {
       return res.status(404).json({
@@ -120,6 +123,8 @@ export const updateProduct = async (
       });
     }
 
+    await cache.invalidate(productCacheScope(req.user.userId));
+
     return res.status(200).json({
       success: true,
       product
@@ -148,6 +153,8 @@ export const deleteProduct = async (
         message: "Product not found"
       });
     }
+
+    await cache.invalidate(productCacheScope(req.user.userId));
 
     return res.status(200).json({
       success: true,

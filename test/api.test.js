@@ -44,6 +44,13 @@ test("missing and malformed auth fields return 400", async () => {
   }
 });
 
+test("unknown API routes return JSON instead of an HTML error page", async () => {
+  const response = await fetch(base + "/api/not-a-route");
+  assert.equal(response.status, 404);
+  assert.match(response.headers.get("content-type"), /application\/json/);
+  assert.equal((await response.json()).code, "API_ROUTE_NOT_FOUND");
+});
+
 test("invalid product input returns 400", async () => {
   for (const body of [undefined, {}, { title: " ", price: 1 }, { title: "Test", price: -1 }, { title: "Test", price: null }]) {
     assert.equal((await request("/api/products", body, true)).status, 400);
@@ -67,7 +74,7 @@ test("product updates cannot transfer ownership or inject update operators", asy
 test("database input errors return appropriate client statuses", async (t) => {
   t.mock.method(Product, "findOne", async () => { throw new mongoose.Error.CastError("ObjectId", "invalid", "_id"); });
   assert.equal((await request("/api/products/invalid", undefined, true, "GET")).status, 400);
-  t.mock.method(User, "findOne", async () => { throw Object.assign(new Error("duplicate"), { code: 11000 }); });
+  t.mock.method(User, "findOne", async () => { throw Object.assign(new Error("duplicate"), { code: 11000, keyPattern: { username: 1 } }); });
   assert.equal((await request("/api/auth/register", { fullName: "Test", username: "test", password: "secret" })).status, 409);
 });
 

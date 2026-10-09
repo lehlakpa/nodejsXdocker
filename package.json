@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "migrate:order-indexes": "node scripts/migrate-order-indexes.js",
     "test": "node --test",
     "start": "node server.js",
     "dev": "nodemon server.js"

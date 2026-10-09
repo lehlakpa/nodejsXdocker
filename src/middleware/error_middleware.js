@@ -13,7 +13,9 @@ export const errorHandler = (
   }
   if (err.code === 11000) {
     status = 409;
-    message = "Username already exists";
+    message = err.keyPattern?.username
+      ? "Username already exists"
+      : "A record with these details already exists. Please retry your request.";
   }
   if (status >= 500) {
     console.error(err);

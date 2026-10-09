@@ -130,6 +130,20 @@ test("aborted requests are cancelled without refresh or network work", async () 
   assert.equal(calls, 0);
 });
 
+test("stale backend HTML 404 gives actionable error without replaying writes", async () => {
+  let calls = 0;
+  const client = createApiClient({ fetchImpl: async () => {
+    calls++;
+    return new Response("<pre>Cannot POST /api/orders/sync</pre>", { status: 404 });
+  } });
+  await assert.rejects(client.request("/orders/sync", { method: "POST" }), error => {
+    assert.equal(error.status, 404);
+    assert.match(error.message, /restart the backend/);
+    return true;
+  });
+  assert.equal(calls, 1);
+});
+
 test("API configuration validates URLs and timeouts", () => {
   assert.deepEqual(
     createConfig({

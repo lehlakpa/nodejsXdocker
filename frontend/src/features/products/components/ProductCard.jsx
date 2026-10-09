@@ -1,5 +1,5 @@
 import { formatMoney as money } from "../../../utils/products.js";
-export default function ProductCard({ product, onEdit, onDelete }) {
+export default function ProductCard({ product, onEdit, onDelete, onBuy }) {
   return (
     <article className="flex min-w-0 flex-col rounded-xl border border-stone-200 p-5">
       <span
@@ -17,6 +17,9 @@ export default function ProductCard({ product, onEdit, onDelete }) {
       <strong className="mt-auto text-lg font-semibold">
         {money(product.price)}
       </strong>
+      <button onClick={() => onBuy(product)} className="mt-4 w-full rounded-lg bg-[#365443] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#293d34]">
+        Buy now
+      </button>
       <div className="mt-4 flex justify-between border-t border-stone-100 pt-3">
         <button
           onClick={() => onEdit(product)}

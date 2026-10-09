@@ -1,4 +1,4 @@
-export default function Sidebar({ user, loading, productCount, onAccount }) {
+export default function Sidebar({ user, loading, productCount, onAccount, screen }) {
   return (
     <aside className="flex items-center gap-4 border-b border-stone-200 bg-white px-5 py-4 md:fixed md:inset-y-0 md:left-0 md:w-60 md:flex-col md:items-stretch md:border-r md:px-6 md:py-8">
       <a
@@ -25,12 +25,17 @@ export default function Sidebar({ user, loading, productCount, onAccount }) {
         </p>
         <a
           href="#products"
-          className="flex items-center gap-3 rounded-lg bg-[#eef3e9] p-3 text-xs font-semibold"
+          aria-current={screen === "products" ? "page" : undefined}
+          className={`flex items-center gap-3 rounded-lg p-3 text-xs font-semibold ${screen === "products" ? "bg-[#eef3e9]" : ""}`}
         >
           <span className="text-xl">▦</span> Products{" "}
           <span className="ml-auto rounded bg-[#dfe8d8] px-2 py-1 text-[10px]">
             {productCount}
           </span>
+        </a>
+        <a href="#orders" aria-current={screen === "orders" ? "page" : undefined}
+          className={`mt-2 flex items-center gap-3 rounded-lg p-3 text-xs font-semibold ${screen === "orders" ? "bg-[#eef3e9]" : ""}`}>
+          <span aria-hidden="true" className="text-xl">≡</span> Orders
         </a>
         <button
           onClick={onAccount}

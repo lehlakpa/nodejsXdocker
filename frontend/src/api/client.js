@@ -45,7 +45,9 @@ export function createApiClient({
         data = text ? JSON.parse(text) : null;
       } catch {
         throw new ApiError(
-          "The server returned an invalid response. Please try again.",
+          response.status === 404
+            ? "This feature is unavailable on the running server. Please restart the backend with the latest code."
+            : "The server returned an invalid response. Please try again.",
           response.status,
           "INVALID_RESPONSE",
         );

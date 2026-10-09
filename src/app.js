@@ -4,6 +4,7 @@ import cors from "cors";
 
 import authRoutes from "./routes/auth_route.js";
 import productRoutes from "./routes/product_route.js";
+import orderRoutes from "./routes/order_route.js";
 
 import {
   errorHandler
@@ -39,6 +40,10 @@ app.use(
   productRoutes
 );
 
+app.use("/api/orders", orderRoutes);
+app.use("/api", (req, res) => {
+  res.status(404).json({ success: false, code: "API_ROUTE_NOT_FOUND", message: "This API endpoint is unavailable. Please check that the backend is up to date." });
+});
 app.use(errorHandler);
 
 export default app;

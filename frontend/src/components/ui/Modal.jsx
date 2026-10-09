@@ -16,7 +16,7 @@ export default function Modal({ title, close, busy, children }) {
         if (!busy) close();
       }}
       aria-labelledby={titleId}
-      className="fixed inset-0 m-auto max-h-[90dvh] w-[440px] max-w-[calc(100%-32px)] overflow-y-auto rounded-2xl border border-stone-200 bg-white p-7 text-[#293d34] shadow-2xl backdrop:bg-[#182b2466] backdrop:backdrop-blur-sm"
+      className="fixed inset-0 m-auto max-h-[90dvh] max-w-[calc(100%-32px)] overflow-y-auto rounded-2xl border border-stone-200 bg-white p-7 text-[#293d34] shadow-2xl backdrop:bg-[#182b2466] backdrop:backdrop-blur-sm"
     >
       <div className="mb-5 flex items-center justify-between">
         <span className="text-[9px] font-semibold tracking-[.2em] text-stone-500">

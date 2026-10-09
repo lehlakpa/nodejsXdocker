@@ -27,8 +27,12 @@ const request = (path, body, authenticated = false, method = "POST") => fetch(ba
   ...(body === undefined ? {} : { body: JSON.stringify(body) })
 });
 
-test("app serves health response and protects products", async () => {
-  assert.equal((await fetch(base)).status, 200);
+test("backend serves health response, protects products and does not serve frontend", async () => {
+  assert.equal((await fetch(base)).status, 404);
+  assert.deepEqual(await (await fetch(base + "/api/health")).json(), {
+    success: true,
+    message: "API running"
+  });
   assert.equal((await fetch(base + "/api/products")).status, 401);
 });
 

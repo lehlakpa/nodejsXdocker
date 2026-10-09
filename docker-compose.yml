@@ -1,5 +1,17 @@
 services:
 
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${FRONTEND_API_BASE_URL:-/api}
+        VITE_API_TIMEOUT_MS: ${FRONTEND_API_TIMEOUT_MS:-15000}
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      - app
+    restart: unless-stopped
+
   app:
     build: .
     # Dockerfile बाट image बनाऊ।

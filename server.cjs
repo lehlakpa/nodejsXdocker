@@ -2,6 +2,7 @@ const express = require("express");
 const { createClient } = require("redis");
 const { rateLimit } = require("express-rate-limit");
 const { RedisStore } = require("rate-limit-redis");
+const { title } = require("node:process");
 
 const app = express();
 
@@ -11,7 +12,6 @@ app.use(express.json());
 const redis = createClient({
   url: process.env.REDIS_URL || "redis://localhost:6379",
 });
-
 redis.on("error", (error) => {
   const details = error.errors?.map((cause) => cause.message).join("; ");
   console.error("Redis error:", details || error.message || error.code);
@@ -21,6 +21,7 @@ redis.on("error", (error) => {
 const products = [
   { id: 1, title: "Keyboard", price: 1500 },
   { id: 2, title: "Mouse", price: 800 },
+  {id:2,title:"mouse",price:400}
 ];
 
 const CACHE_KEY = "demo:products";
@@ -131,7 +132,7 @@ async function startServer() {
     }),
 
     message: {
-      message: "धेरै request भयो। केही समयपछि प्रयास गर।",
+      message: "too many  request wait a minute",
     },
   });
 

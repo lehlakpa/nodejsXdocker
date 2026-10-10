@@ -6,10 +6,21 @@ import Product from "../models/Product_model.js";
 import { protect } from "../middleware/auth_middleware.js";
 import { esewaConfig, paymentForm } from "../utils/esewa.js";
 import { reconcileOrder } from "../utils/orderPayments.js";
+import { paymentLimiter } from "../middleware/security.js";
 
 const router = express.Router();
 router.use(protect);
-router.post("/sync", async (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid order ID" });
+    }
+    const order = await Order.findOneAndDelete({ _id: req.params.id, buyer: req.user.userId });
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.status(204).end();
+  } catch (error) { next(error); }
+});
+router.post("/sync", paymentLimiter, async (req, res, next) => {
   try {
     // Bounded parallel checks finish within the provider timeout. Keep failures
     // pending and still allow order history to load when eSewa is unavailable.
@@ -86,7 +97,7 @@ router.get("/:id", async (req, res, next) => {
     res.json({ order });
   } catch (error) { next(error); }
 });
-router.post("/:id/verify", async (req, res, next) => {
+router.post("/:id/verify", paymentLimiter, async (req, res, next) => {
   try {
     let order = await Order.findOne({ _id: req.params.id, buyer: req.user.userId });
     if (!order) return res.status(404).json({ message: "Order not found" });

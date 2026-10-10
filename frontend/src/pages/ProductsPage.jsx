@@ -9,12 +9,10 @@ import { useWorkspace } from "../hooks/useWorkspace.js";
 import { MODAL } from "../constants/app.js";
 import { useEffect, useState } from "react";
 import OrdersPage from "./OrdersPage.jsx";
-import Checkout from "../components/Checkout.jsx";
 import PaymentResult from "../components/PaymentResult.jsx";
 
 export default function ProductsPage() {
   const workspace = useWorkspace();
-  const [purchase, setPurchase] = useState(null);
   const [screen, setScreen] = useState(() => window.location.hash === "#orders" || new URLSearchParams(window.location.search).has("order") ? "orders" : "products");
   useEffect(() => {
     const navigate = () => setScreen(window.location.hash === "#orders" ? "orders" : "products");
@@ -31,7 +29,7 @@ export default function ProductsPage() {
         onAccount={account}
         screen={screen}
       >
-        <PaymentResult key={purchase?._id || "idle"} user={user} />
+        <PaymentResult user={user} />
         {screen === "orders" ? <OrdersPage key={user?.id || user?._id || "guest"} user={user} onSignIn={() => open(MODAL.AUTH)} /> : <>
         <section className="mb-7 flex items-center justify-between gap-3">
           <div>
@@ -56,12 +54,10 @@ export default function ProductsPage() {
           onSignIn={() => open(MODAL.AUTH)}
           onEdit={(product) => open(MODAL.PRODUCT, product)}
           onDelete={(product) => open(MODAL.DELETE, product)}
-          onBuy={setPurchase}
         />
         </>}
       </WorkspaceLayout>
       <WorkspaceDialogs workspace={workspace} />
-      {purchase && <Checkout product={purchase} close={() => setPurchase(null)} />}
       <Toast message={notice} />
     </>
   );

@@ -2,7 +2,7 @@ export default function Sidebar({ user, loading, productCount, onAccount, screen
   return (
     <aside className="flex items-center gap-4 border-b border-stone-200 bg-white px-5 py-4 md:fixed md:inset-y-0 md:left-0 md:w-60 md:flex-col md:items-stretch md:border-r md:px-6 md:py-8">
       <a
-        href="/"
+        href="/admin"
         className="flex items-center gap-2 text-2xl font-bold tracking-tighter"
       >
         <span className="grid size-9 place-items-center rounded-xl bg-[#214d3c] pb-1 text-3xl text-white">
@@ -13,7 +13,7 @@ export default function Sidebar({ user, loading, productCount, onAccount, screen
       <div className="mt-7 hidden items-center gap-3 rounded-lg border border-stone-200 p-3 md:flex">
         <span className="rounded-lg bg-stone-100 p-2 text-xs">W</span>
         <div className="text-xs font-medium">
-          My workspace
+          Admin workspace
           <p className="mt-1 text-[10px] font-normal text-stone-500">
             Product management
           </p>

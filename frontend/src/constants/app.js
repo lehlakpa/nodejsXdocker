@@ -14,7 +14,7 @@ export const MODAL = Object.freeze({
 export const LIMITS = Object.freeze({
   NAME: 100,
   USERNAME: 100,
-  PASSWORD_MIN: 6,
+  PASSWORD_MIN: 12,
   TITLE: 200,
   DESCRIPTION: 3000,
 });

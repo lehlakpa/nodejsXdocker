@@ -1,4 +1,5 @@
 import express from "express";
+import { authLimiter } from "../middleware/security.js";
 
 import {
   register,
@@ -14,9 +15,9 @@ import {
 
 const router = express.Router();
 
-router.post("/register", register);
+router.post("/register", authLimiter, register);
 
-router.post("/login", login);
+router.post("/login", authLimiter, login);
 
 router.post(
   "/refresh",

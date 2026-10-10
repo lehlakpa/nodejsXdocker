@@ -4,7 +4,7 @@ import { once } from "node:events";
 import app from "../src/app.js";
 import Product from "../src/models/Product_model.js";
 import User from "../src/models/User_model.js";
-import { cache, createCache } from "../src/utils/cache.js";
+import { cache, createCache, storefrontCacheScope } from "../src/utils/cache.js";
 import { generateAccessToken, generateRefreshToken } from "../src/utils/token.js";
 
 function fakeRedis() {
@@ -197,4 +197,22 @@ test("product writes and reads still succeed with Redis offline", async (t) => {
   t.mock.method(Product, "find", () => ({ sort: async () => [] }));
   assert.equal((await request("/api/products", "POST", { title: "Offline", price: 1 })).status, 201);
   assert.deepEqual((await (await request("/api/products")).json()).products, []);
+});
+
+test("public catalogue is cached and product changes invalidate it", async t => {
+  installCache(t);
+  let reads = 0;
+  let title = "Original";
+  t.mock.method(Product, "find", () => ({ select: projection => {
+    assert.equal(projection, "title description price images.url");
+    return { sort: () => ({ lean: async () => { reads++; return [{ title }]; } }) };
+  } }));
+  const list = async () => (await (await request("/api/store/products", "GET", undefined, null)).json()).products;
+  assert.equal((await list())[0].title, "Original");
+  await list();
+  assert.equal(reads, 1);
+  title = "Updated";
+  await cache.invalidate(storefrontCacheScope);
+  assert.equal((await list())[0].title, "Updated");
+  assert.equal(reads, 2);
 });

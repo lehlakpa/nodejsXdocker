@@ -18,7 +18,7 @@ services:
     container_name: node_auth_api
 
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
       #  artha compuer 5000-> docker 5000
 
     env_file:
@@ -46,7 +46,7 @@ services:
     container_name: node_auth_mongo
 
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
 
     volumes:
       - mongo_data:/data/db

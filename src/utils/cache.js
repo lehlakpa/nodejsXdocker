@@ -57,4 +57,5 @@ export function createCache(client, ttl = CACHE_TTL_SECONDS) {
 
 export const cache = createCache(redis);
 export const productCacheScope = (userId) => `products:${userId}`;
+export const storefrontCacheScope = "storefront:products";
 export const profileCacheScope = (userId) => `profile:${userId}`;

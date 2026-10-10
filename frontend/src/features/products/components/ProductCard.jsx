@@ -1,13 +1,9 @@
 import { formatMoney as money } from "../../../utils/products.js";
-export default function ProductCard({ product, onEdit, onDelete, onBuy }) {
+import ProductGallery from "../../../components/ProductGallery.jsx";
+export default function ProductCard({ product, onEdit, onDelete }) {
   return (
     <article className="flex min-w-0 flex-col rounded-xl border border-stone-200 p-5">
-      <span
-        aria-hidden="true"
-        className="mb-4 grid size-10 place-items-center rounded-lg bg-[#eef1e5] text-[#708560]"
-      >
-        {product.title[0]?.toUpperCase()}
-      </span>
+      <div className="mb-4"><ProductGallery product={product} /></div>
       <h3 className="mb-2 break-words text-sm font-semibold">
         {product.title}
       </h3>
@@ -17,9 +13,6 @@ export default function ProductCard({ product, onEdit, onDelete, onBuy }) {
       <strong className="mt-auto text-lg font-semibold">
         {money(product.price)}
       </strong>
-      <button onClick={() => onBuy(product)} className="mt-4 w-full rounded-lg bg-[#365443] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#293d34]">
-        Buy now
-      </button>
       <div className="mt-4 flex justify-between border-t border-stone-100 pt-3">
         <button
           onClick={() => onEdit(product)}

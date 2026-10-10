@@ -17,7 +17,6 @@ export default function ProductCollection({
   onSignIn,
   onEdit,
   onDelete,
-  onBuy,
 }) {
   return (
     <section
@@ -78,7 +77,6 @@ export default function ProductCollection({
               product={product}
               onEdit={onEdit}
               onDelete={onDelete}
-              onBuy={onBuy}
             />
           ))}
         </div>

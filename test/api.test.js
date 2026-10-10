@@ -13,6 +13,7 @@ const user = { _id: "507f1f77bcf86cd799439011", username: "tester" };
 before(async () => {
   process.env.ACCESS_TOKEN_SECRET = "test-access-secret";
   process.env.REFRESH_TOKEN_SECRET = "test-refresh-secret";
+  process.env.ALLOW_REGISTRATION = "true";
   server = app.listen(0, "127.0.0.1");
   await once(server, "listening");
   base = `http://127.0.0.1:${server.address().port}`;
@@ -68,20 +69,25 @@ test("product updates cannot transfer ownership or inject update operators", asy
   }, true, "PUT");
   assert.equal(response.status, 200);
   assert.equal(captured.filter.owner, user._id);
-  assert.deepEqual(captured.update, { $set: { title: "Changed" } });
+  assert.deepEqual(captured.update, { $set: { title: "Changed" }, $inc: { __v: 1 } });
 });
 
 test("database input errors return appropriate client statuses", async (t) => {
   t.mock.method(Product, "findOne", async () => { throw new mongoose.Error.CastError("ObjectId", "invalid", "_id"); });
   assert.equal((await request("/api/products/invalid", undefined, true, "GET")).status, 400);
   t.mock.method(User, "findOne", async () => { throw Object.assign(new Error("duplicate"), { code: 11000, keyPattern: { username: 1 } }); });
-  assert.equal((await request("/api/auth/register", { fullName: "Test", username: "test", password: "secret" })).status, 409);
+  assert.equal((await request("/api/auth/register", { fullName: "Test", username: "test", password: "test-password-long" })).status, 409);
 });
 
 test("refresh rotates tokens and rejects the previous token", async (t) => {
   const oldToken = generateRefreshToken(user);
   const storedUser = { ...user, refreshTokenHash: await bcrypt.hash(digestRefreshToken(oldToken), 4), save: async () => {} };
   t.mock.method(User, "findById", async () => storedUser);
+  t.mock.method(User, "findOneAndUpdate", async (filter, update) => {
+    if (storedUser.refreshTokenHash !== filter.refreshTokenHash) return null;
+    storedUser.refreshTokenHash = update.$set.refreshTokenHash;
+    return storedUser;
+  });
   const refresh = (token) => fetch(base + "/api/auth/refresh", { method: "POST", headers: { Cookie: `refreshToken=${token}` } });
   const response = await refresh(oldToken);
   assert.equal(response.status, 200);

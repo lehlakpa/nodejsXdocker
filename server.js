@@ -4,11 +4,13 @@ import app from "./src/app.js";
 import { connectDB } from "./src/config/db.js";
 import { connectRedis, closeRedis } from "./src/config/redis.js";
 import mongoose from "mongoose";
+import { validateSecurityConfig } from "./src/config/security.js";
 
 const PORT =
   process.env.PORT || 5000;
 
 const startServer = async () => {
+  validateSecurityConfig();
   await connectDB();
   connectRedis();
 

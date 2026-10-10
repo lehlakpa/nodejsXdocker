@@ -14,7 +14,8 @@ export const protect = (req, res, next) => {
 
     const decoded = jwt.verify(
       accessToken,
-      process.env.ACCESS_TOKEN_SECRET
+      process.env.ACCESS_TOKEN_SECRET,
+      { algorithms: ["HS256"] }
     );
 
     req.user = decoded;

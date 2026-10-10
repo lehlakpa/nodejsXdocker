@@ -20,12 +20,13 @@ export function createApiClient({
   let refreshPromise;
   async function request(
     path,
-    { method = "GET", body, signal, refresh = true } = {},
+    { method = "GET", body, signal, refresh = true, timeout = timeoutMs } = {},
   ) {
     signal?.throwIfAborted();
     const requestSignal = signal
-      ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)])
-      : AbortSignal.timeout(timeoutMs);
+      ? AbortSignal.any([signal, AbortSignal.timeout(timeout)])
+      : AbortSignal.timeout(timeout);
+    const multipart = typeof FormData !== "undefined" && body instanceof FormData;
     let response;
     let data;
     try {
@@ -35,9 +36,9 @@ export function createApiClient({
         signal: requestSignal,
         headers: {
           Accept: "application/json",
-          ...(body === undefined ? {} : { "Content-Type": "application/json" }),
+          ...(body === undefined || multipart ? {} : { "Content-Type": "application/json" }),
         },
-        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+        ...(body === undefined ? {} : { body: multipart ? body : JSON.stringify(body) }),
       });
       if (response.status === 204) return null;
       const text = await response.text();
@@ -72,7 +73,7 @@ export function createApiClient({
       });
       await refreshPromise;
       signal?.throwIfAborted();
-      return request(path, { method, body, signal, refresh: false });
+      return request(path, { method, body, signal, refresh: false, timeout });
     }
     if (!response.ok)
       throw new ApiError(

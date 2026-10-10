@@ -16,7 +16,7 @@ const getCookieOptions = () => {
   return {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "none" : "lax"
+    sameSite: "lax"
   };
 };
 
@@ -25,12 +25,12 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
 
   res.cookie("accessToken", accessToken, {
     ...options,
-    maxAge: 15 * 60 * 1000
+    maxAge: Math.max(0, jwt.decode(accessToken).exp * 1000 - Date.now())
   });
 
   res.cookie("refreshToken", refreshToken, {
     ...options,
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge: Math.max(0, jwt.decode(refreshToken).exp * 1000 - Date.now())
   });
 };
 
@@ -41,6 +41,9 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
 
 export const register = async (req, res, next) => {
   try {
+    if (process.env.ALLOW_REGISTRATION !== "true") {
+      return res.status(403).json({ message: "Admin registration is disabled." });
+    }
     const {
       fullName,
       username,
@@ -54,10 +57,10 @@ export const register = async (req, res, next) => {
       });
     }
 
-    if (password.length < 6) {
+    if (password.length < 12 || Buffer.byteLength(password, "utf8") > 72 || fullName.length > 100 || username.length > 100) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 6 characters"
+        message: "Use a password of at least 12 characters and at most 72 bytes; names must be at most 100 characters."
       });
     }
 
@@ -119,6 +122,7 @@ export const login = async (req, res, next) => {
         message: "Username and password are required"
       });
     }
+    if (username.length > 100 || Buffer.byteLength(password, "utf8") > 72) return res.status(400).json({ message: "Invalid login details" });
 
     const user = await User.findOne({
       username: username.trim().toLowerCase()
@@ -201,7 +205,8 @@ export const refreshAccessToken = async (req, res, next) => {
     try {
       decoded = jwt.verify(
         refreshToken,
-        process.env.REFRESH_TOKEN_SECRET
+        process.env.REFRESH_TOKEN_SECRET,
+        { algorithms: ["HS256"] }
       );
     } catch {
       return res.status(401).json({
@@ -241,12 +246,14 @@ export const refreshAccessToken = async (req, res, next) => {
       generateRefreshToken(user);
 
     // Refresh token rotation
-    user.refreshTokenHash = await bcrypt.hash(
+    const nextRefreshHash = await bcrypt.hash(
       digestRefreshToken(newRefreshToken),
       10
     );
 
-    await user.save();
+    const rotated = await User.findOneAndUpdate({ _id: user._id, refreshTokenHash: user.refreshTokenHash },
+      { $set: { refreshTokenHash: nextRefreshHash } }, { new: true });
+    if (!rotated) return res.status(401).json({ message: "Refresh session already changed. Please sign in again." });
 
     await cache.invalidate(profileCacheScope(user._id));
 
@@ -306,7 +313,8 @@ export const logout = async (req, res, next) => {
       try {
         const decoded = jwt.verify(
           refreshToken,
-          process.env.REFRESH_TOKEN_SECRET
+          process.env.REFRESH_TOKEN_SECRET,
+          { algorithms: ["HS256"] }
         );
 
         await User.findByIdAndUpdate(

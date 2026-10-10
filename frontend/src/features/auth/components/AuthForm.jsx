@@ -2,7 +2,7 @@ import Button from "../../../components/ui/Button.jsx";
 import FormField from "../../../components/ui/FormField.jsx";
 import { LIMITS } from "../../../constants/app.js";
 
-export default function AuthForm({ register, busy, onSubmit, onToggle }) {
+export default function AuthForm({ register, busy, onSubmit }) {
   return (
     <form
       onSubmit={(event) => {
@@ -47,12 +47,6 @@ export default function AuthForm({ register, busy, onSubmit, onToggle }) {
               ? "Create account ↗"
               : "Sign in ↗"}
         </Button>
-        <p className="text-center text-xs text-stone-500">
-          {register ? "Already have an account?" : "New here?"}{" "}
-          <button type="button" className="text-green-800" onClick={onToggle}>
-            {register ? "Sign in" : "Create an account"}
-          </button>
-        </p>
       </fieldset>
     </form>
   );

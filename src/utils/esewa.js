@@ -21,6 +21,7 @@ export function paymentForm(order, config = esewaConfig()) {
   }
   const callback = (result) => {
     const url = new URL(config.clientUrl);
+    url.pathname = order.customer?.name ? "/" : "/admin";
     url.searchParams.set("order", String(order._id));
     url.searchParams.set("payment", result);
     return url.href;

@@ -23,6 +23,11 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
+    },
+    images: {
+      type: [{ url: { type: String, required: true }, publicId: { type: String, required: true }, _id: false }],
+      default: [],
+      validate: { validator: images => images.length <= 3, message: "A product can have at most 3 images." }
     }
   },
   {
@@ -30,4 +35,6 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+productSchema.index({ owner: 1, createdAt: -1 });
+productSchema.index({ createdAt: -1 });
 export default mongoose.model("Product", productSchema);

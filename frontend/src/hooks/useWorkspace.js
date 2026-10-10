@@ -137,7 +137,7 @@ export function useWorkspace() {
     setError("");
     let body;
     try {
-      body = validateProduct(values);
+      body = { ...validateProduct(values), images: values.images, retainedImages: values.retainedImages };
     } catch (err) {
       setError(err.message);
       return;
